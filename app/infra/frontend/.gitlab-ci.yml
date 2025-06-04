@@ -1,0 +1,66 @@
+variables:  
+  # Kubernetes configuration
+  HELM_RELEASE_NAME: residencia-app
+  NAMESPACE: gsc-residencia-devops-dev
+
+.default_rules: &default_rules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+stages:
+  - deploy
+
+.deploy_template: &deploy_template
+  image: 
+    name: alpine/helm:3.14.0
+    entrypoint: [""]
+  before_script:
+    # Instalar kubectl
+    - apk add --no-cache curl
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+    # Configurar acesso ao cluster
+    - echo "${KUBECONFIG_FILE}" | base64 -d > ${CI_PROJECT_DIR}/kubeconfig
+    - export KUBECONFIG=${CI_PROJECT_DIR}/kubeconfig
+  script:
+    # Verificar se o namespace existe, se não, criar
+    - kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+    - |
+      kubectl create secret docker-registry gsc-devops \
+      --docker-server="$HARBOR_REGISTRY" \
+      --docker-username="$HARBOR_USERNAME" \
+      --docker-password="$HARBOR_PASSWORD" \
+      --dry-run=client \
+      --output=yaml > image-pull-secret.yaml
+    - kubectl apply -f image-pull-secret.yaml -n $NAMESPACE
+    # Deploy usando Helm
+    - >
+      helm --kubeconfig=${CI_PROJECT_DIR}/kubeconfig upgrade --install ${HELM_RELEASE_NAME} .
+      --namespace ${NAMESPACE}
+      --timeout 5m
+      --values values-production.yaml
+  after_script:
+    # Limpar kubeconfig
+    - rm -f ${CI_PROJECT_DIR}/kubeconfig
+
+deploy_to_staging:
+  <<: *deploy_template
+  stage: deploy
+  environment:
+    name: staging
+    url: https://residencia-devops.hmg.apps.kloud.rnp.br
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+deploy_to_production:
+  <<: *deploy_template
+  stage: deploy
+  environment:
+    name: production
+    url: https://residencia-devops.hmg.apps.kloud.rnp.br
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual

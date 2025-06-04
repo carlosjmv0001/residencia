@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  nextjs:
+    build:
+      context: .
+      target: ${NODE_ENV:-development}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL}
+      - API_KEY=${API_KEY}
+      - OTHER_SECRET=${OTHER_SECRET}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next

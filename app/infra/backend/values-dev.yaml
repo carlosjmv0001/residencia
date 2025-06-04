@@ -1,0 +1,25 @@
+image:
+  repository: registry.apps.rnp.br/gsc-residencia-devops/backend-app
+  tag: latest
+
+ingress:
+  hosts:
+    - host: residencia-devops.hmg.apps.kloud.rnp.br
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: backend-tls
+      hosts:
+        - residencia-devops.hmg.apps.kloud.rnp.br
+
+api:
+  url: https://api-residencia-devops.hmg.apps.kloud.rnp.br
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi

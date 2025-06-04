@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts: []
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+api:
+  url: ""

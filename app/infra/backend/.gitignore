@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+
+# Diretório de saída do Helm
+output/
+
+# Arquivos temporários
+tmp/
+*.swp
+
+# Arquivos de dependência do Helm
+charts/
+*.tgz
+
+# Arquivos de cache
+.cache/
+*.bak
+
+# Arquivos de configuração locais
+local.yaml
+*.local
+
+# Arquivos de secret
+*.secret
+
+# MacOS e Linux
+.DS_Store
+*.DS_Store
+
+# Outros
+.vscode/
+.idea/
+*.iml
+
+# Ignorar os arquivos gerados pelo Helm
+*.lock
+release.yaml
+
+# Ignorar arquivos de backup
+*.bak
+*.orig
+*.old
